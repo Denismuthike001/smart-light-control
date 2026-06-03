@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Light Control</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.card{
+    background:white;
+    width:350px;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+h1{
+    color:#0f172a;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:gray;
+    margin-bottom:30px;
+}
+
+.bulb{
+    font-size:80px;
+    margin-bottom:20px;
+    transition:0.3s;
+}
+
+.status{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:25px;
+}
+
+.on{
+    color:#facc15;
+}
+
+.off{
+    color:#94a3b8;
+}
+
+.switch{
+    position:relative;
+    display:inline-block;
+    width:80px;
+    height:40px;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    cursor:pointer;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background:#ccc;
+    transition:.4s;
+    border-radius:34px;
+}
+
+.slider:before{
+    position:absolute;
+    content:"";
+    height:32px;
+    width:32px;
+    left:4px;
+    bottom:4px;
+    background:white;
+    transition:.4s;
+    border-radius:50%;
+}
+
+input:checked + .slider{
+    background:#22c55e;
+}
+
+input:checked + .slider:before{
+    transform:translateX(40px);
+}
+
+.footer{
+    margin-top:25px;
+    color:#64748b;
+    font-size:14px;
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+
+<div class="card">
+
+    <h1>💡 Smart Light</h1>
+    <p class="subtitle">Control from Anywhere</p>
+
+    <div id="bulb" class="bulb off">💡</div>
+
+    <div id="status" class="status off">
+        OFF
+    </div>
+
+    <label class="switch">
+        <input type="checkbox" id="toggleSwitch">
+        <span class="slider"></span>
+    </label>
+
+    <div class="footer">
+        ESP32 + Firebase
+    </div>
+
+</div>
+
+<script>
+
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+    apiKey: "AIzaSyAPy6YbRYVrUay-1PS9xbzsJDa86wzrhlQ",
+    authDomain: "esp32led-2f7c2.firebaseapp.com",
+    databaseURL: "https://esp32led-2f7c2-default-rtdb.firebaseio.com",
+    projectId: "esp32led-2f7c2"
+};
+
+// ===========================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+const toggle = document.getElementById("toggleSwitch");
+const statusText = document.getElementById("status");
+const bulb = document.getElementById("bulb");
+
+// Write to Firebase
+toggle.addEventListener("change", () => {
+
+    const state = toggle.checked ? 1 : 0;
+
+    db.ref("Light1").set(state);
+});
+
+// Read from Firebase (Real-Time)
+db.ref("Light1").on("value", (snapshot)=>{
+
+    const state = snapshot.val();
+
+    if(state == 1){
+
+        toggle.checked = true;
+
+        statusText.innerHTML = "ON";
+        statusText.className = "status on";
+
+        bulb.className = "bulb on";
+
+    }else{
+
+        toggle.checked = false;
+
+        statusText.innerHTML = "OFF";
+        statusText.className = "status off";
+
+        bulb.className = "bulb off";
+    }
+
+});
+
+</script>
+
+</body>
+</html>
